@@ -37,30 +37,27 @@ public class SmsController {
     String message;
 
 
-
-
     @PostMapping("/saveNumberList")
     public boolean setMobileNumbersToArray(@RequestBody List<NumberDTO>numbers){
         for (NumberDTO obj:numbers){
             System.out.println(obj.getNumber());
         }
         numberDTOS=numbers;
-
         if(numberDTOS.size()>0){
             return true;
         }
         return false;
     }
+
     @PostMapping("/saveTimeAndMessage")
     public void setTimeAndMessage(@RequestBody MessageAndTime messageAndTime){
-
         this.setMonth=messageAndTime.getMonth()+1;
         this.setDay=messageAndTime.getDay();
         this.setHour=messageAndTime.getHour();
         this.setMinute=messageAndTime.getMinute();
         this.message=messageAndTime.getMessage();
+        this.isSend=false;
     }
-
 
     public ResponseEntity<String> sendSMS() {
         for (NumberDTO number:numberDTOS){
@@ -74,7 +71,7 @@ public class SmsController {
         return new ResponseEntity<String>("Message sent successfully", HttpStatus.OK);
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 60000)
     public void time() throws FileNotFoundException {
 
         LocalDate date = LocalDate.now();
@@ -87,19 +84,14 @@ public class SmsController {
 
         System.out.println("======================= number list =======================");
         try {
-            for (NumberDTO obj:numberDTOS){
-                System.out.println(obj.getNumber());
-            }
-        }catch (Exception e){
-            System.out.println(e);
-        }
+            for (NumberDTO obj:numberDTOS){ System.out.println(obj.getNumber());}
+        }catch (Exception e){ System.out.println(e);}
+
         System.out.println("================= front end details ============================");
         System.out.println("month : "+setMonth);
         System.out.println("day : "+setDay);
         System.out.println("hour : "+setHour);
         System.out.println("minute : "+setMinute);
-
-
 
         System.out.println("================= back end details ============================");
         System.out.println("month : "+month);
@@ -108,18 +100,15 @@ public class SmsController {
         System.out.println("minute : "+minute);
         System.out.println("message  :"+ message);
 
-
         if(setMonth==month && setDay == day){
             if(setHour==hour && setMinute==minute){
                 if(isSend==false){
                     System.out.println("message send now");
-
                     SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
                     Date dates = new Date();
                     System.out.println(formatter.format(dates));
-
                     // call method here
-
+                    // sendSMS();
                     isSend=true; // set message send already
                 }
             }
@@ -127,7 +116,7 @@ public class SmsController {
     }
     //set all variable of clear
     @GetMapping("/clearAll")
-    public boolean clearAll(){
+    public boolean cancelScheduleMessage(){
         numberDTOS=new ArrayList<>();
         this.setHour=0;
         this.setMinute=0;
